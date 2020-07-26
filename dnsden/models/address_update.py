@@ -1,5 +1,7 @@
 from ipaddress import IPv4Address, IPv6Address
 
+from dns.rdatatype import RdataType
+
 
 class AddressUpdate:
     """
@@ -10,21 +12,25 @@ class AddressUpdate:
     For address types other than IPv4 and IPv6, subclass this and add it to your protocol file.
     """
 
-    def __init__(self, update_source):
-        """:param update_source: """
-        # TODO Add type to update_source
-        self.update_source = update_source
+    def __init__(self):
+        pass
 
 
-class IPv4AddressUpdate:
+class IPv4AddressUpdate(AddressUpdate):
     """An update for an Internet Protocol version 4 address."""
 
     def __init__(self, address: IPv4Address):
+        super(IPv4AddressUpdate, self).__init__()
         self.address = address
+        self.rdtype = RdataType.A
+        """The DNS record type that represents this kind of address."""
 
 
-class IPv6AddressUpdate:
+class IPv6AddressUpdate(AddressUpdate):
     """An update for an Internet Protocol version 6 address."""
 
     def __init__(self, address: IPv6Address):
+        super(IPv6AddressUpdate, self).__init__()
         self.address = address
+        self.rdtype = RdataType.AAAA
+        """The DNS record type that represents this kind of address."""
