@@ -1,20 +1,22 @@
 import ipaddress
+from abc import ABC
 from typing import Union
 
 from dns import resolver
 from dns.rdataclass import RdataClass
+from pyhocon import ConfigTree
 
 from dnsden.models.address_update import IPv4AddressUpdate, IPv6AddressUpdate
 
 
-class DynamicDNSUpdater:
+class DynamicDNSUpdater(ABC):
     """
     The base class for all updaters provided by DNSDen. An updater represents a specific configuration of a dynamic DNS
     service, with its own authentication token and target hostname. An updater is generally responsible for updating a
     single name within a single service/protocol.
     """
 
-    def __init__(self, config):
+    def __init__(self, config: ConfigTree):
         self.config = config
 
     def update(self, address_update):
@@ -26,8 +28,7 @@ class DynamicDNSUpdater:
         :return: None
         :raises If the update was unable to be executed.
         """
-
-        print("FIXME: Unimplemented update() in {}".format(self.__name__))
+        raise NotImplementedError("FIXME: Unimplemented update() in {}".format(self.__name__))
 
     def needs_update(self, address_update: Union[IPv4AddressUpdate, IPv6AddressUpdate]) -> bool:
         """
