@@ -25,6 +25,12 @@ class IPv4AddressUpdate(AddressUpdate):
         self.rdtype = RdataType.A
         """The DNS record type that represents this kind of address."""
 
+    def __str__(self):
+        return str(self.address)
+
+    def __repr__(self):
+        return "{}({})".format(type(self).__name__, repr(self.address))
+
 
 class IPv6AddressUpdate(AddressUpdate):
     """An update for an Internet Protocol version 6 address."""
@@ -34,3 +40,9 @@ class IPv6AddressUpdate(AddressUpdate):
         self.address = address
         self.rdtype = RdataType.AAAA
         """The DNS record type that represents this kind of address."""
+
+    def __str__(self):
+        return str(self.address)
+
+    def __repr__(self):
+        return "{}({})".format(type(self).__name__, repr(self.address))

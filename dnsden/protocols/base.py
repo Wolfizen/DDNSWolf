@@ -28,7 +28,7 @@ class DynamicDNSUpdater(ABC):
         :return: None
         :raises If the update was unable to be executed.
         """
-        raise NotImplementedError("FIXME: Unimplemented update() in {}".format(self.__name__))
+        raise NotImplementedError("FIXME: Unimplemented update() in {}".format(type(self).__name__))
 
     def needs_update(self, address_update: Union[IPv4AddressUpdate, IPv6AddressUpdate]) -> bool:
         """
@@ -47,7 +47,7 @@ class DynamicDNSUpdater(ABC):
         """
 
         if not isinstance(address_update, IPv4AddressUpdate) or isinstance(address_update, IPv6AddressUpdate):
-            raise Exception("Unsupported address update for {}: {}".format(self.__name__, address_update))
+            raise Exception("Unsupported address update for {}: {}".format(type(self).__name__, address_update))
 
         # Use the system default resolver.
         answers = resolver.resolve(self.config["name"], address_update.rdtype, RdataClass.IN)
