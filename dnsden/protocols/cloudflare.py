@@ -39,7 +39,11 @@ class CloudflareDNSUpdater(DynamicDNSUpdater):
                 data=json.dumps({"content": str(address_update.address)}))
             # Update success! (API throws on error)
         else:
-            # Record does not exist. Create it with sensible defaults. TTL of 1 indicates automatic choice by CF.
+            # Record does not exist. Create it with sensible defaults, unless configured not to. TTL of 1 indicates
+            # automatic choice by CF.
+            if self.config["no_create_records"]:
+                raise Exception("Refused to create DNS record for {} due to configuration setting."
+                                .format(str(address_update.address)))
             self.cf.zones.dns_records.post(
                 cf_zone["id"],
                 data=json.dumps({
