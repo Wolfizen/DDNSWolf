@@ -8,6 +8,8 @@ from dnsden.sources.base import AddressSource
 
 class InterfaceAddressSource(AddressSource):
 
+    config_type_name = "interface"
+
     def __init__(self, *args, **kwargs):
         super(InterfaceAddressSource, self).__init__(*args, **kwargs)
 
