@@ -45,9 +45,9 @@ class PublicAddressFilter(AddressFilter):
 
         def is_public(a):
             if isinstance(a, IPv4AddressUpdate):
-                return a.address.is_private
+                return a.address.is_global
             elif isinstance(a, IPv6AddressUpdate):
-                return a.address.is_private
+                return a.address.is_global
             else:
                 return False
 
