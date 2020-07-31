@@ -23,6 +23,8 @@ class CloudflareDNSUpdater(DynamicDNSUpdater):
         Include the specific zone where the hostname lives.
     """
 
+    config_type_name = "cloudflare"
+
     def __init__(self, *args, **kwargs):
         super(CloudflareDNSUpdater, self).__init__(*args, **kwargs)
         self.cf = CloudFlare(token=self.config["token"])

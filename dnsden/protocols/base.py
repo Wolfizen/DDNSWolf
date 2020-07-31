@@ -16,10 +16,26 @@ class DynamicDNSUpdater(ABC):
     single name within a single service/protocol.
     """
 
-    def __init__(self, config: ConfigTree):
-        self.config = config
+    config_type_name: str = NotImplemented
+    """
+    This class variable defines the name to use in the program configuration to reference this updater. There can only
+    be one name per updater, and it cannot conflict with any other updater. This is different from the instance name,
+    which refers to the custom identifier given to a particular instance of an updater.
+    """
 
-    def update(self, address_update):
+    def __init__(self, name: str, config: ConfigTree):
+        self.name = name
+        """
+        The instance name of this updater. This is set by the user, and uniquely identifies this particular instance
+        within the global config.
+        """
+        self.config = config
+        """
+        The config for this updater. This config is a local view of only the options for this instance. Use it however
+        you want, but consider using the standard names of common fields. Check other protocols for reference.
+        """
+
+    def update(self, address_update) -> None:
         """
         Ask the service to change the address of the configured name to be the address in the update. This method should
         not check if the address needs changing, that is done in needs_update().
