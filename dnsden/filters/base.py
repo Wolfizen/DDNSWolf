@@ -1,5 +1,6 @@
 from abc import ABC
 
+from dnsden.models.address_provider import AddressProvider
 from dnsden.models.address_update import AddressUpdate
 
 
@@ -43,3 +44,32 @@ class AddressFilter(ABC):
         :return: The addresses after filtering.
         """
         raise NotImplementedError("FIXME: Unimplemented filter() in {}".format(type(self).__name__))
+
+    def as_provider(self, parent_source: AddressProvider) -> AddressProvider:
+        """
+        Converts this address filter into an address provider, by binding the input of this filter to the output of an
+        AddressProvider. This allows easy chaining of filters that start at an original source.
+
+        :param parent_source: The provider to ask for input to this filter.
+        :return: An AddressFilterProxyProvider of this filter and the provided source.
+        """
+        return AddressFilterProxyProvider(self, parent_source)
+
+
+class AddressFilterProxyProvider(AddressProvider):
+    """
+    Allows an AddressFilter to act as an AddressProvider, by binding its input to the output of another provider.
+    Each time provide_addresses() is called on this object, the proxied AddressProvider's provide_addresses() function
+    will also be called, to get the input for the filter.
+    """
+
+    def __init__(self, run_filter: AddressFilter, parent_source: AddressProvider):
+        """
+        :param run_filter: The filter to apply to the addresses provided by parent_source.
+        :param parent_source: The upstream source to get the list of addresses from.
+        """
+        self.run_filter = run_filter
+        self.parent_source = parent_source
+
+    def provide_addresses(self) -> [AddressUpdate]:
+        return self.run_filter.filter(self.parent_source.provide_addresses())
