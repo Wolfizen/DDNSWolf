@@ -1,7 +1,7 @@
 from typing import Union
 
-from dnsden.filters.base import AddressFilter
-from dnsden.models.address_update import AddressUpdate
+from ddnswolf.filters.base import AddressFilter
+from ddnswolf.models.address_update import AddressUpdate
 
 
 class NthAddressFilter(AddressFilter):

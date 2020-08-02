@@ -2,8 +2,8 @@ from ipaddress import IPv4Address, IPv6Address
 
 import netifaces
 
-from dnsden.models.address_update import AddressUpdate, IPv4AddressUpdate, IPv6AddressUpdate
-from dnsden.sources.base import AddressSource
+from ddnswolf.models.address_update import AddressUpdate, IPv4AddressUpdate, IPv6AddressUpdate
+from ddnswolf.sources.base import AddressSource
 
 
 class InterfaceAddressSource(AddressSource):

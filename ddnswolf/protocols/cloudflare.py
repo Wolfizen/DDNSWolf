@@ -8,9 +8,9 @@ from CloudFlare import CloudFlare
 from CloudFlare.exceptions import CloudFlareAPIError
 from dns.rdatatype import RdataType, UnknownRdatatype
 
-from dnsden import util
-from dnsden.models.address_update import IPv4AddressUpdate, IPv6AddressUpdate
-from dnsden.protocols.base import DynamicDNSUpdater
+from ddnswolf import util
+from ddnswolf.models.address_update import IPv4AddressUpdate, IPv6AddressUpdate
+from ddnswolf.protocols.base import DynamicDNSUpdater
 
 
 class CloudflareDNSUpdater(DynamicDNSUpdater):

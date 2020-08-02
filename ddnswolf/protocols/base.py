@@ -6,12 +6,12 @@ from dns import resolver
 from dns.rdataclass import RdataClass
 from pyhocon import ConfigTree
 
-from dnsden.models.address_update import IPv4AddressUpdate, IPv6AddressUpdate
+from ddnswolf.models.address_update import IPv4AddressUpdate, IPv6AddressUpdate
 
 
 class DynamicDNSUpdater(ABC):
     """
-    The base class for all updaters provided by DNSDen. An updater represents a specific configuration of a dynamic DNS
+    The base class for all updaters provided by DDNSWolf. An updater represents a specific configuration of a dynamic DNS
     service, with its own authentication token and target hostname. An updater is generally responsible for updating a
     single name within a single service/protocol.
     """

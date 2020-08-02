@@ -2,7 +2,7 @@ from abc import ABC
 
 from pyhocon import ConfigTree
 
-from dnsden.models.address_provider import AddressProvider
+from ddnswolf.models.address_provider import AddressProvider
 
 
 class AddressSource(AddressProvider, ABC):

@@ -5,7 +5,7 @@ from dns.rdatatype import RdataType
 
 class AddressUpdate:
     """
-    An update of one of the address sources that DNSDen is monitoring. Most often this update will represent an address
+    An update of one of the address sources that DDNSWolf is monitoring. Most often this update will represent an address
     on a network interface. The address identified by this update may not be an "updated" address, i.e. this object will
     be created regardless of if the address actually changed or not.
 

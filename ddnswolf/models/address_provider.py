@@ -1,6 +1,6 @@
 from abc import ABC
 
-from dnsden.models.address_update import AddressUpdate
+from ddnswolf.models.address_update import AddressUpdate
 
 
 class AddressProvider(ABC):

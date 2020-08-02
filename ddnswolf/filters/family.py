@@ -1,5 +1,5 @@
-from dnsden.filters.base import AddressFilter
-from dnsden.models.address_update import AddressUpdate, IPv4AddressUpdate, IPv6AddressUpdate
+from ddnswolf.filters.base import AddressFilter
+from ddnswolf.models.address_update import AddressUpdate, IPv4AddressUpdate, IPv6AddressUpdate
 
 
 class IPv4AddressFilter(AddressFilter):

@@ -1,7 +1,7 @@
 from abc import ABC
 
-from dnsden.models.address_provider import AddressProvider
-from dnsden.models.address_update import AddressUpdate
+from ddnswolf.models.address_provider import AddressProvider
+from ddnswolf.models.address_update import AddressUpdate
 
 
 class AddressFilter(ABC):
