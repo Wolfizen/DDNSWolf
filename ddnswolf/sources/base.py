@@ -24,8 +24,17 @@ class AddressSource(AddressProvider, ABC):
     which refers to the custom identifier given to a particular instance of a source.
     """
 
-    def __init__(self, config: ConfigTree):
+    def __init__(self, name: str, config: ConfigTree):
         super(AddressSource, self).__init__()
+        self.name = name
+        """
+        The instance name of this source. This is set by the user, and uniquely identifies this particular instance
+        within the global config.
+        """
         self.config = config
+        """
+        The config for this source. This config is a local view of only the options for this instance. Use it however
+        you want, but consider using the standard names of common fields. Check other sources for reference.
+        """
 
     # From AddressProvider: provide_addresses(self) -> [AddressUpdate]:
