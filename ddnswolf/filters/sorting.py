@@ -1,3 +1,5 @@
+from typing import Iterable
+
 from ddnswolf.filters.base import AddressFilter
 from ddnswolf.models.address_update import AddressUpdate, IPv4AddressUpdate, IPv6AddressUpdate
 
@@ -10,7 +12,7 @@ class BinaryValueSortAddressFilter(AddressFilter):
 
     config_type_name = "sorted"
 
-    def filter(self, addresses: [AddressUpdate]) -> [AddressUpdate]:
+    def filter(self, addresses: Iterable[AddressUpdate]) -> Iterable[AddressUpdate]:
         """
         Sort the list of addresses by their binary representation. Addresses with smaller binary values go first.
         IPv4 addresses are placed before IPv6 addresses. Addresses of unknown type are placed at the end, and compared

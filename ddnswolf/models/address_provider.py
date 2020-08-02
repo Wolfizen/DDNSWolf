@@ -1,4 +1,5 @@
 from abc import ABC
+from typing import Iterable
 
 from ddnswolf.models.address_update import AddressUpdate
 
@@ -15,7 +16,7 @@ class AddressProvider(ABC):
     to another provider.
     """
 
-    def provide_addresses(self) -> [AddressUpdate]:
+    def provide_addresses(self) -> Iterable[AddressUpdate]:
         """
         Get the current addresses represented by this provider. This call may involve a network request, system call, or
         other blocking operation. Caching should not be involved unless absolutely necessary, for example with a

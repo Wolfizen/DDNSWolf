@@ -37,4 +37,4 @@ class AddressSource(AddressProvider, ABC):
         you want, but consider using the standard names of common fields. Check other sources for reference.
         """
 
-    # From AddressProvider: provide_addresses(self) -> [AddressUpdate]:
+    # From AddressProvider: provide_addresses(self) -> Iterable[AddressUpdate]:

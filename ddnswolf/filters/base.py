@@ -1,4 +1,5 @@
 from abc import ABC
+from typing import Iterable
 
 from ddnswolf.models.address_provider import AddressProvider
 from ddnswolf.models.address_update import AddressUpdate
@@ -33,7 +34,7 @@ class AddressFilter(ABC):
     def __init__(self):
         super(AddressFilter, self).__init__()
 
-    def filter(self, addresses: [AddressUpdate]) -> [AddressUpdate]:
+    def filter(self, addresses: Iterable[AddressUpdate]) -> Iterable[AddressUpdate]:
         """
         Performs a filter operation on a list of addresses. Filters may alter their behavior according to the arguments
         given when they were initialized. Each filter class should perform the same filter operation each time,
@@ -71,5 +72,5 @@ class AddressFilterProxyProvider(AddressProvider):
         self.run_filter = run_filter
         self.parent_source = parent_source
 
-    def provide_addresses(self) -> [AddressUpdate]:
+    def provide_addresses(self) -> Iterable[AddressUpdate]:
         return self.run_filter.filter(self.parent_source.provide_addresses())

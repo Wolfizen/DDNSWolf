@@ -1,4 +1,5 @@
 from ipaddress import IPv4Address, IPv6Address
+from typing import Iterable
 
 import netifaces
 
@@ -13,7 +14,7 @@ class InterfaceAddressSource(AddressSource):
     def __init__(self, *args, **kwargs):
         super(InterfaceAddressSource, self).__init__(*args, **kwargs)
 
-    def provide_addresses(self) -> [AddressUpdate]:
+    def provide_addresses(self) -> Iterable[AddressUpdate]:
         if self.config["iface"] not in netifaces.interfaces():
             raise Exception("Interface {} does not exist!".format(self.config["iface"]))
 

@@ -1,3 +1,5 @@
+from typing import Iterable
+
 from ddnswolf.filters.base import AddressFilter
 from ddnswolf.models.address_update import AddressUpdate, IPv4AddressUpdate, IPv6AddressUpdate
 
@@ -7,7 +9,7 @@ class PrivateAddressFilter(AddressFilter):
 
     config_type_name = "private"
 
-    def filter(self, addresses: [AddressUpdate]) -> [AddressUpdate]:
+    def filter(self, addresses: Iterable[AddressUpdate]) -> Iterable[AddressUpdate]:
         """
         Selects private IPv4 or IPv6 addresses. Only addresses that are within the specifically designated multiple-use
         non-Internet routable blocks are considered private. The relative ordering of addresses is preserved.
@@ -33,7 +35,7 @@ class PublicAddressFilter(AddressFilter):
 
     config_type_name = "public"
 
-    def filter(self, addresses: [AddressUpdate]) -> [AddressUpdate]:
+    def filter(self, addresses: Iterable[AddressUpdate]) -> Iterable[AddressUpdate]:
         """
         Selects public IPv4 or IPv6 addresses. Only addresses that are within the specifically designated global
         Internet routable blocks are considered private. The relative ordering of addresses is preserved.
