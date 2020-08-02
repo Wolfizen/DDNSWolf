@@ -50,7 +50,7 @@ class CloudflareDNSUpdater(DynamicDNSUpdater):
                 cf_zone["id"],
                 data=json.dumps({
                     "type": RdataType.to_text(address_update.rdtype),
-                    "name": self.config["name"],
+                    "name": self.config["hostname"],
                     "content": str(address_update.address),
                     "ttl": 1}))
             # Update success! (API throws on error)
@@ -65,9 +65,9 @@ class CloudflareDNSUpdater(DynamicDNSUpdater):
     def _get_record_for(self, address_update: Union[IPv4AddressUpdate, IPv6AddressUpdate]) -> Optional[dict]:
         """Get the record details for the configured name. May return None if no record exists."""
         cf_zone = self._get_zone()
-        for record in self.cf.zones.dns_records.get(cf_zone["id"], params={"name": self.config["name"]}):
+        for record in self.cf.zones.dns_records.get(cf_zone["id"], params={"name": self.config["hostname"]}):
             try:
-                if (util.dns_names_equal(record["name"], self.config["name"])
+                if (util.dns_names_equal(record["name"], self.config["hostname"])
                         and RdataType.from_text(record["type"]) == address_update.rdtype):
                     return record
             except UnknownRdatatype:
@@ -80,11 +80,10 @@ class CloudflareDNSUpdater(DynamicDNSUpdater):
             return self._cf_zone
 
         # Cloudflare's API requires a large-scope permission to be able to list *all* zones. This permission is not
-        # required if specifying the zone by name. An iterative search to find the correct zone name is performed here,
-        # removing the lowest level name each time.
-        zone_name = dns.name.from_text(self.config["name"])
-        self._cf_zone = None
-        while self._cf_zone is None:
+        # required if specifying the zone by name. Therefore, to avoid asking for that permission, an iterative search
+        # is performed to find the correct zone name.
+        zone_name = dns.name.from_text(self.config["hostname"])
+        while True:
             try:
                 # Attempt to get the zone details.
                 for zone in self.cf.zones.get(params={"name": str(zone_name)}):
@@ -94,13 +93,14 @@ class CloudflareDNSUpdater(DynamicDNSUpdater):
                         return self._cf_zone
             except CloudFlareAPIError:
                 # The zone name we tried is not valid. Move to parent name.
-                try:
-                    zone_name = zone_name.parent()
-                except dns.name.NoParent:
-                    # No more names to check. Probably invalid configuration.
-                    raise Exception(
-                        "Could not find the zone for {}. Either it is the wrong name or the access token does"
-                        "not have sufficient permissions to read the zone.".format(self.config["name"]))
+                pass
+            try:
+                zone_name = zone_name.parent()
+            except dns.name.NoParent:
+                # No more names to check. Probably invalid configuration.
+                raise Exception(
+                    "Could not find the zone for {}. Either it is the wrong name or the access token does"
+                    "not have sufficient permissions to read the zone.".format(self.config["hostname"]))
 
     def _set_zone(self, zone):
         """Update the cache of the Cloudflare zone."""
