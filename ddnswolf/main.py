@@ -1,5 +1,6 @@
 import os.path
-from datetime import timedelta
+import time
+from datetime import timedelta, datetime
 from typing import List
 
 from pyhocon import ConfigFactory, ConfigTree
@@ -16,10 +17,25 @@ class DDNSWolfApplication:
         self.sources = sources
         self.updaters = updaters
         self.check_interval = check_interval
+        self.active = False
 
-    def start(self):
-        # TODO
-        pass
+    def run(self):
+        self.active = True
+        last_update = datetime.min
+        while self.active:
+            now = datetime.now()
+            if last_update + self.check_interval <= now:
+                self.update_now()
+                last_update = now
+            else:
+                time.sleep(((last_update + self.check_interval) - now).total_seconds())
+
+    def update_now(self) -> None:
+        """
+        Runs all updaters. Current implementation is to defer to .update_from_subscriptions()
+        """
+        for updater in self.updaters:
+            updater.update_from_subscriptions()
 
     @classmethod
     def from_config(cls, config: ConfigTree = None, config_path: str = None) -> 'DDNSWolfApplication':
@@ -34,21 +50,35 @@ class DDNSWolfApplication:
             config = cls.read_config(config_path)
 
         # Global options.
-        check_interval = config.get_int("check_interval_seconds")
+        check_interval = timedelta(seconds=config.get_int("check_interval_seconds"))
 
         # Load source objects.
+        util.import_all_submodules("ddnswolf.sources")
         source_classes = {source_cls.config_type_name: source_cls
                           for source_cls in util.find_all_subclasses(AddressSource)}
         sources = {}
         for source_name, source_config in config.get_config("sources").items():
-            sources[source_name] = source_classes[source_config.get_string("type")](source_name, source_config)
+            try:
+                source_type_name = source_config.get_string("type")
+                source_cls = source_classes[source_type_name]
+                sources[source_name] = source_cls(source_name, source_config)
+            except KeyError:
+                # noinspection PyUnboundLocalVariable
+                raise KeyError("Could not find a source with the type {}.".format(source_type_name))
 
         # Load updater objects.
+        util.import_all_submodules("ddnswolf.protocols")
         updater_classes = {updater_cls.config_type_name: updater_cls
                            for updater_cls in util.find_all_subclasses(DynamicDNSUpdater)}
         updaters: List[DynamicDNSUpdater] = []
         for updater_name, updater_config in config.get_config("updaters").items():
-            updaters.append(updater_classes[updater_config.get_string("type")](updater_name, updater_config))
+            try:
+                updater_type_name = updater_config.get_string("type")
+                updater_cls = updater_classes[updater_type_name]
+                updaters.append(updater_cls(updater_name, updater_config))
+            except KeyError:
+                # noinspection PyUnboundLocalVariable
+                raise KeyError("Could not find an updater with the name {}.".format(updater_type_name))
 
         # Parse and connect updater subscriptions.
         #   "What the hell is this?" you may ask. This is an evil and amazing solution to parsing a filter string.
@@ -65,6 +95,7 @@ class DDNSWolfApplication:
         # are left as themselves because they are already providers.
         subscription_eval_locals = {}
         subscription_eval_locals.update(sources)
+        util.import_all_submodules("ddnswolf.filters")
         for filter_cls in util.find_all_subclasses(AddressFilter):
             def create_this_filter(*args):
                 parent_source = args[-1]
@@ -76,8 +107,11 @@ class DDNSWolfApplication:
             subscription_eval_locals[filter_cls.config_type_name] = create_this_filter
         for updater in updaters:
             for subscription_str in updater.config.get_list("subscriptions"):
-                computed_provider = eval(subscription_str, {}, subscription_eval_locals)
-                updater.subscribe(computed_provider)
+                try:
+                    computed_provider = eval(subscription_str, {}, subscription_eval_locals)
+                    updater.subscribe(computed_provider)
+                except NameError as ex:
+                    raise NameError("Unknown filter or source: {}".format(ex))
 
         return DDNSWolfApplication(list(sources.values()), updaters, check_interval)
 
@@ -103,7 +137,8 @@ class DDNSWolfApplication:
 
 
 def main():
-    # TODO
+    app = DDNSWolfApplication.from_config()
+    app.run()
     pass
 
 
