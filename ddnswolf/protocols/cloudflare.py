@@ -40,12 +40,8 @@ class CloudflareDNSUpdater(DynamicDNSUpdater):
                 cf_zone["id"], cf_record["id"],
                 data=json.dumps({"content": str(address_update.address)}))
             # Update success! (API throws on error)
-        else:
-            # Record does not exist. Create it with sensible defaults, unless configured not to. TTL of 1 indicates
-            # automatic choice by CF.
-            if self.config["no_create_records"]:
-                raise Exception("Refused to create DNS record for {} due to configuration setting."
-                                .format(str(address_update.address)))
+        elif self.config["create_records"]:
+            # Record does not exist. Create it with sensible defaults. TTL of 1 indicates automatic choice by CF.
             self.cf.zones.dns_records.post(
                 cf_zone["id"],
                 data=json.dumps({
@@ -54,6 +50,9 @@ class CloudflareDNSUpdater(DynamicDNSUpdater):
                     "content": str(address_update.address),
                     "ttl": 1}))
             # Update success! (API throws on error)
+        else:
+            raise Exception("DNS record missing for {}, and configuration does not allow creating the record."
+                            .format(str(address_update.address)))
 
     def needs_update(self, address_update: Union[IPv4AddressUpdate, IPv6AddressUpdate]) -> bool:
         cf_record = self._get_record_for(address_update)
@@ -99,7 +98,7 @@ class CloudflareDNSUpdater(DynamicDNSUpdater):
             except dns.name.NoParent:
                 # No more names to check. Probably invalid configuration.
                 raise Exception(
-                    "Could not find the zone for {}. Either it is the wrong name or the access token does"
+                    "Could not find the zone for {}. Either it is the wrong name or the access token does "
                     "not have sufficient permissions to read the zone.".format(self.config["hostname"]))
 
     def _set_zone(self, zone):
