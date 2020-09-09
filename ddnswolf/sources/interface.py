@@ -16,7 +16,7 @@ class InterfaceAddressSource(AddressSource):
 
     def provide_addresses(self) -> Iterable[AddressUpdate]:
         if self.config["iface"] not in netifaces.interfaces():
-            raise Exception("Interface {} does not exist!".format(self.config["iface"]))
+            raise Exception(f"Interface {self.config['iface']} does not exist!")
 
         # Interfaces can have any number of addresses, from any address family. This logic selects address families
         # that we can support and constructs an AddressUpdate for each address within that family.

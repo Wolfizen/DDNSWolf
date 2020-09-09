@@ -24,4 +24,4 @@ class AddressProvider(ABC):
 
         :return The list of addresses represented by this provider.
         """
-        raise NotImplementedError("FIXME: Unimplemented provide_addresses() in {}".format(type(self).__name__))
+        raise NotImplementedError(f"FIXME: Unimplemented provide_addresses() in {type(self).__name__}")

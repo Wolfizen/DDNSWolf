@@ -64,7 +64,7 @@ class DDNSWolfApplication:
                 sources[source_name] = source_cls(source_name, source_config)
             except KeyError:
                 # noinspection PyUnboundLocalVariable
-                raise KeyError("Could not find a source with the type {}.".format(source_type_name))
+                raise KeyError(f"Could not find a source with the type {source_type_name}.")
 
         # Load updater objects.
         util.import_all_submodules("ddnswolf.protocols")
@@ -78,7 +78,7 @@ class DDNSWolfApplication:
                 updaters.append(updater_cls(updater_name, updater_config))
             except KeyError:
                 # noinspection PyUnboundLocalVariable
-                raise KeyError("Could not find an updater with the name {}.".format(updater_type_name))
+                raise KeyError(f"Could not find an updater with the name {updater_type_name}.")
 
         # Parse and connect updater subscriptions.
         #   "What the hell is this?" you may ask. This is an evil and amazing solution to parsing a filter string.
@@ -111,7 +111,7 @@ class DDNSWolfApplication:
                     computed_provider = eval(subscription_str, {}, subscription_eval_locals)
                     updater.subscribe(computed_provider)
                 except NameError as ex:
-                    raise NameError("Unknown filter or source: {}".format(ex))
+                    raise NameError(f"Unknown filter or source: {ex}")
 
         return DDNSWolfApplication(list(sources.values()), updaters, check_interval)
 
@@ -132,7 +132,7 @@ class DDNSWolfApplication:
                 # Try the next path
                 pass
         if not config:
-            raise Exception("Unable to load a configuration. Attempted paths: {}".format(", ".join(try_paths)))
+            raise Exception(f"Unable to load a configuration. Attempted paths: {', '.join(try_paths)}")
         return config
 
 

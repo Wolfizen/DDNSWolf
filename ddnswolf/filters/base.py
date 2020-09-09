@@ -44,7 +44,7 @@ class AddressFilter(ABC):
         :param addresses: The input addresses.
         :return: The addresses after filtering.
         """
-        raise NotImplementedError("FIXME: Unimplemented filter() in {}".format(type(self).__name__))
+        raise NotImplementedError(f"FIXME: Unimplemented filter() in {type(self).__name__}")
 
     def as_provider(self, parent_source: AddressProvider) -> AddressProvider:
         """

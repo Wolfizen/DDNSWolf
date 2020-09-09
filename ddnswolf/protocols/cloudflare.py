@@ -51,8 +51,8 @@ class CloudflareDNSUpdater(DynamicDNSUpdater):
                     "ttl": 1}))
             # Update success! (API throws on error)
         else:
-            raise Exception("DNS record missing for {}, and configuration does not allow creating the record."
-                            .format(str(address_update.address)))
+            raise Exception(f"DNS record missing for {address_update.address}, and configuration does not allow "
+                            f"creating the record.")
 
     def needs_update(self, address_update: Union[IPv4AddressUpdate, IPv6AddressUpdate]) -> bool:
         cf_record = self._get_record_for(address_update)
@@ -98,8 +98,8 @@ class CloudflareDNSUpdater(DynamicDNSUpdater):
             except dns.name.NoParent:
                 # No more names to check. Probably invalid configuration.
                 raise Exception(
-                    "Could not find the zone for {}. Either it is the wrong name or the access token does "
-                    "not have sufficient permissions to read the zone.".format(self.config["hostname"]))
+                    f"Could not find the zone for {self.config['hostname']}. Either it is the wrong name or the "
+                    f"access token does not have sufficient permissions to read the zone.")
 
     def _set_zone(self, zone):
         """Update the cache of the Cloudflare zone."""

@@ -51,7 +51,7 @@ class DynamicDNSUpdater(ABC):
         :return: None
         :raises If the update was unable to be executed.
         """
-        raise NotImplementedError("FIXME: Unimplemented update() in {}".format(type(self).__name__))
+        raise NotImplementedError(f"FIXME: Unimplemented update() in {type(self).__name__}")
 
     def needs_update(self, address_update: Union[IPv4AddressUpdate, IPv6AddressUpdate]) -> bool:
         """
@@ -70,7 +70,7 @@ class DynamicDNSUpdater(ABC):
         """
 
         if not isinstance(address_update, IPv4AddressUpdate) or isinstance(address_update, IPv6AddressUpdate):
-            raise Exception("Unsupported address update for {}: {}".format(type(self).__name__, address_update))
+            raise Exception(f"Unsupported address update for {type(self).__name__}: {address_update}")
 
         # Use the system default resolver.
         answers = resolver.resolve(self.config["name"], address_update.rdtype, RdataClass.IN)
@@ -98,10 +98,10 @@ class DynamicDNSUpdater(ABC):
         The cleanup process picks the first global address for each subclass of AddressUpdate. If there are no public
         addresses, then the first address of any kind is picked.
         """
-        print("Starting update for {}...".format(self.name))
+        print(f"Starting update for {self.name}...")
 
         all_addresses = list(itertools.chain(*map(lambda p: p.provide_addresses(), self.subscriptions)))
-        print("Addresses received from subscriptions: {}.".format(", ".join(map(str, all_addresses))))
+        print(f"Addresses received from subscriptions: {', '.join(map(str, all_addresses))}.")
 
         cleaned_addresses = {}
         for addr in all_addresses:
@@ -119,11 +119,11 @@ class DynamicDNSUpdater(ABC):
             # noinspection PyBroadException
             try:
                 if self.needs_update(addr):
-                    print("Sending update for address {}.".format(addr))
+                    print(f"Sending update for address {addr}.")
                     self.update(addr)
                 else:
-                    print("Update not needed for address {}.".format(addr))
+                    print(f"Update not needed for address {addr}.")
             except Exception as ex:
-                print("An error occurred while updating address {}: {}.".format(addr, ex))
+                print(f"An error occurred while updating address {addr}: {ex}.")
 
-        print("Update finished for {}.".format(self.name))
+        print(f"Update finished for {self.name}.")

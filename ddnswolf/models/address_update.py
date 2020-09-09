@@ -29,7 +29,7 @@ class IPv4AddressUpdate(AddressUpdate):
         return str(self.address)
 
     def __repr__(self):
-        return "{}({})".format(type(self).__name__, repr(self.address))
+        return f"{type(self).__name__}({self.address!r})"
 
 
 class IPv6AddressUpdate(AddressUpdate):
@@ -45,4 +45,4 @@ class IPv6AddressUpdate(AddressUpdate):
         return str(self.address)
 
     def __repr__(self):
-        return "{}({})".format(type(self).__name__, repr(self.address))
+        return f"{type(self).__name__}({self.address!r})"
