@@ -8,6 +8,13 @@ from ddnswolf.sources.base import AddressSource
 
 
 class InterfaceAddressSource(AddressSource):
+    """
+    Provides addresses of local network interfaces. Interfaces can have any number of addresses, this source will
+    return ALL of them. It is important to use address filters to select the appropriate address for your use.
+
+    Interfaces are identified by their canonical "interface name." This is an OS-level concept and your particular OS
+    will have its own naming scheme.
+    """
 
     config_type_name = "interface"
 
