@@ -4,9 +4,9 @@ Tools to calculate the current version identifier of the project. To use this fi
 either import it in another python module and call calculate_full_version() or run this
 file as a script.
 """
+from abc import ABC
 from importlib.util import spec_from_loader, module_from_spec
 
-from git import Repo
 from pkg_resources import parse_version
 
 
@@ -29,96 +29,183 @@ Examples:
 """
 
 
-def is_snapshot_build() -> bool:
+class VersionInfo(ABC):
     """
-    Determines if the current project state is a snapshot not tied to any particular
-    commit.
+    This class knows how to find the other parts of the version specifier. The release
+    version is known, but the build number and snapshot build status must be calculated
+    based on the state of the project repository.
 
-    If the git repo has any change from HEAD (working directory or index) it is
-    considered a snapshot.
-
-    :return: True if the current state is a snapshot with no specific version.
+    See DynamicVersionInfo for implementation.
     """
-    project_repo = Repo(path=None)
-    return project_repo.is_dirty(untracked_files=True)
+
+    def is_snapshot_build(self) -> bool:
+        """
+        Determines if the current project state is a snapshot not tied to any particular
+        commit.
+
+        If the git repo has any change from HEAD (working directory or index) it is
+        considered a snapshot.
+
+        :return: True if the current state is a snapshot with no specific version.
+        """
+        return NotImplemented
+
+    def get_build_number(self) -> int:
+        """
+        Calculate the development build number for the current state of the project.
+        Build numbers are based on git history. The build number increments for each commit.
+        The current build number is defined as the total number of commits above the current
+        commit, plus one for the current commit, plus one if it is a snapshot.
+        Initial-commit is build 1.
+
+        This build number retains its lattice property for merge commits - the build number
+        of a merge commit will be greater than the build numbers of each parent commit.
+
+        :return: Current build number.
+        """
+        return NotImplemented
+
+    def is_primary_release(self) -> bool:
+        """
+        Determines if the current project state is the first commit of a primary release.
+        Only the first commit having a particular release version is the canonical commit
+        identified by that version. Every commit after it (sharing the same release version)
+        is a later version and needs a build number attached.
+
+        If the logic of this function is substantially modified, such as changing the
+        path of the version module, the release version MUST be incremented. If it is not,
+        this function cannot know if it is a primary release when one or more of its
+        parents are incompatible.
+
+        :return: True if the current commit is the first commit having its release version.
+        """
+        return NotImplemented
+
+    def get_full_version(self) -> str:
+        """
+        Calculate the complete version identifier for the current state of the project.
+
+        * If the current commit is the first commit of a release, then the version
+          identifier is only that release. Example: `3`
+        * If the current commit is not the first commit of a release, then the version
+          identifier is the release plus the build number. Example: `10.4-r256`
+        * If the current commit is a snapshot, then the version identifier is the version
+          it would be if the current changes were committed plus the snapshot identifier.
+
+        :return: The authoritative version number for the current commit.
+        """
+        version = release_version
+        if not self.is_primary_release():
+            version += f"-r{self.get_build_number()}"
+        if self.is_snapshot_build():
+            version += "-dev"
+        return version
 
 
-def calculate_build_number() -> int:
+class DynamicVersionInfo(VersionInfo):
     """
-    Calculate the development build number for the current state of the project.
-    Build numbers are based on git history. The build number increments for each commit.
-    The current build number is defined as the total number of commits above the current
-    commit, plus one for the current commit, plus one if it is a snapshot.
-    Initial-commit is build 1.
-
-    This build number retains its lattice property for merge commits - the build number
-    of a merge commit will be greater than the build numbers of each parent commit.
-
-    :return: Current build number.
+    Gets version information from the state of the git repo.
     """
-    project_repo = Repo(path=None)
-    return (
-            (1 if is_snapshot_build() else 0) +  # Bump for snapshot
-            1 +  # Current commit
-            len(list(project_repo.head.commit.iter_parents())))  # All ancestors
+
+    def __init__(self):
+        super(DynamicVersionInfo, self).__init__()
+        # Deferred import to avoid importing a module that doesn't need to be present
+        # in a deployed build.
+        from git import Repo
+        self.project_repo = Repo(path=None)
+
+    def is_snapshot_build(self) -> bool:
+        return self.project_repo.is_dirty(untracked_files=True)
+
+    def get_build_number(self) -> int:
+        return (
+                (1 if self.is_snapshot_build() else 0) +  # Bump for snapshot
+                1 +  # Current commit
+                len(list(self.project_repo.head.commit.iter_parents())))  # All ancestors
+
+    def is_primary_release(self) -> bool:
+        if self.is_snapshot_build():
+            # Treat snapshot builds as descending from HEAD
+            parent_commits = [self.project_repo.head.commit]
+        else:
+            parent_commits = self.project_repo.head.commit.iter_parents()
+
+        for parent_commit in parent_commits:
+            try:
+                parent_version_module = module_from_spec(spec_from_loader(__name__ + "_dynamic", loader=None))
+                exec(
+                    parent_commit.tree["ddnswolf"]["version.py"].data_stream.read(),
+                    parent_version_module.__dict__)
+                if (
+                        parse_version(parent_version_module.release_version) ==
+                        parse_version(release_version)):
+                    return False
+            except KeyError:
+                # Parent does not have a version.py file, assume release is different.
+                pass
+        return True
 
 
-def is_primary_release() -> bool:
+class StaticVersionInfo(VersionInfo):
     """
-    Determines if the current project state is the first commit of a primary release.
-    Only the first commit having a particular release version is the canonical commit
-    identified by that version. Every commit after it (sharing the same release version)
-    is a later version and needs a build number attached.
-
-    If the logic of this function is substantially modified, such as changing the
-    path of the version module, the release version MUST be incremented. If it is not,
-    this function cannot know if it is a primary release when one or more of its
-    parents are incompatible.
-
-    :return: True if the current commit is the first commit having its release version.
+    Gets version information from static values. Used when building the project
+    as the built copy of the project will not have the git repo available.
     """
-    project_repo = Repo(path=None)
-    if is_snapshot_build():
-        # Treat snapshot builds as descending from HEAD
-        parent_commits = [project_repo.head.commit]
-    else:
-        parent_commits = project_repo.head.commit.iter_parents()
 
-    for parent_commit in parent_commits:
-        try:
-            parent_version_module = module_from_spec(spec_from_loader(__name__ + "_dynamic", loader=None))
-            exec(
-                parent_commit.tree["ddnswolf"]["version.py"].data_stream.read(),
-                parent_version_module.__dict__)
-            if (
-                    parse_version(parent_version_module.release_version) ==
-                    parse_version(release_version)):
-                return False
-        except KeyError:
-            # Parent does not have a version.py file, assume release is different.
-            pass
-    return True
+    def __init__(self, snapshot_build: bool, build_number: int, primary_release: bool):
+        self.snapshot_build = snapshot_build
+        self.build_number = build_number
+        self.primary_release = primary_release
+
+    def is_snapshot_build(self) -> bool:
+        return self.snapshot_build
+
+    def get_build_number(self) -> int:
+        return self.build_number
+
+    def is_primary_release(self) -> bool:
+        return self.primary_release
+
+    def __repr__(self) -> str:
+        """
+        :return: A valid python constructor that replicates this instance.
+        """
+        return f"{type(self).__name__}({self.snapshot_build}, " \
+               f"{self.build_number}, " \
+               f"{self.primary_release})"
+
+
+def _create_static_version_module() -> str:
+    """
+    Generates a python module that contains a StaticVersionInfo copy of the current
+    DynamicVersionInfo information.
+    :return:
+    """
+    dynamic = DynamicVersionInfo()
+    static = StaticVersionInfo(
+        dynamic.is_snapshot_build(),
+        dynamic.get_build_number(),
+        dynamic.is_primary_release())
+    return f"""
+# Dynamically generated file! See ddnswolf.version
+
+from ddnswolf.version import {StaticVersionInfo.__name__}
+
+
+embedded_version_info = {repr(static)}
+"""
 
 
 def calculate_full_version() -> str:
     """
-    Calculate the complete version identifier for the current state of the project.
-
-    * If the current commit is the first commit of a release, then the version
-      identifier is only that release. Example: `3`
-    * If the current commit is not the first commit of a release, then the version
-      identifier is the release plus the build number. Example: `10.4-r256`
-    * If the current commit is a snapshot, then the version identifier is the version
-      it would be if the current changes were committed plus the snapshot identifier.
-
-    :return: The authoritative version number for the current commit.
+    CALL THIS TO GET THE PROJECT VERSION. If a StaticVersionInfo object is present
+    in ddnswolf.version_static, it will be used. Otherwise use DynamicVersionInfo.
     """
-    version = release_version
-    if not is_primary_release():
-        version += f"-r{calculate_build_number()}"
-    if is_snapshot_build():
-        version += "-dev"
-    return version
+    try:
+        from ddnswolf.version_static import embedded_version_info
+        return embedded_version_info.get_full_version()
+    except ImportError:
+        return DynamicVersionInfo().get_full_version()
 
 
 if __name__ == "__main__":
