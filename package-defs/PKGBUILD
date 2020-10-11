@@ -1,0 +1,57 @@
+# Maintainer/Developer: Winona Schroeer-Smith (Wolfizen) <wolfizen@wolfizen.net>
+
+pkgname='ddnswolf-git'
+pkgver=1
+pkgrel=1
+pkgdesc='Dynamic DNS updater'
+arch=('any')
+url='https://github.com/Wolfizen/DDNSWolf'
+license=('GPL3')
+depends=(
+    'python>=3.6' 'python-cloudflare' 'python-dnspython' 'python-netifaces' 'python-pyhocon'
+    'python-requests'
+)
+makedepends=('python-gitpython')
+source=(
+    # When building from a local source this does not need to be downloaded
+    # and can be commented out. However doing that dynamically would be bad
+    # practice, stopping any program trying to programatically understand PKGBUILDs.
+    'git://github.com/Wolfizen/DDNSWolf.git'
+)
+sha256sums=(
+    'SKIP'
+)
+
+# Private function for this build file.
+# Gets the path of the python project root within the source directory.
+_src_pyroot() {
+    if [ ! -z "${LOCAL_SOURCE}" ]; then
+        echo "${srcdir}/DDNSWolf-local"
+    else
+        echo "${srcdir}/DDNSWolf"
+    fi
+}
+
+prepare() {
+    # Use local source if present. LOCAL_SOURCE is a directory path to
+    # a (potentially modified) checkout of the DDNSWolf repo.
+    if [ ! -z "${LOCAL_SOURCE}" ]; then
+        echo 'LOCAL_SOURCE present, copying...'
+        cp -r "${LOCAL_SOURCE}" "$(_src_pyroot)"
+    fi
+}
+
+pkgver() {
+    cd "$(_src_pyroot)"
+    python 'ddnswolf/version.py' | sed 's/-/./g'
+}
+
+build() {
+    cd "$(_src_pyroot)"
+    python 'setup.py' build
+}
+
+package() {
+    cd "$(_src_pyroot)"
+    python 'setup.py' install --skip-build --root="${pkgdir}" --prefix='usr/'
+}
