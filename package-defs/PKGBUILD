@@ -21,6 +21,7 @@ source=(
 sha256sums=(
     'SKIP'
 )
+backup=('etc/ddnswolf.conf')
 
 # Private function for this build file.
 # Gets the path of the python project root within the source directory.
