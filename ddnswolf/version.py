@@ -214,9 +214,9 @@ def calculate_full_version() -> str:
     in ddnswolf.version_static, it will be used. Otherwise use DynamicVersionInfo.
     """
     try:
-        from ddnswolf.version_static import embedded_version_info
+        from . import version_static
 
-        return embedded_version_info.get_full_version()
+        return version_static.embedded_version_info.get_full_version()
     except ImportError:
         return DynamicVersionInfo().get_full_version()
 

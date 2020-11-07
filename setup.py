@@ -5,7 +5,7 @@ import setuptools
 
 from setuptools.command.build_py import build_py as setuptools_build_py
 
-import ddnswolf.version
+from ddnswolf import version as ddnswolf_version
 
 
 class CustomBuildCommand(setuptools_build_py):
@@ -19,13 +19,13 @@ class CustomBuildCommand(setuptools_build_py):
         print(f"Embedding static version -> {module_file_name}")
         with open(module_file_name, "w") as module_file:
             # noinspection PyProtectedMember
-            module_file.write(ddnswolf.version._create_static_version_module())
+            module_file.write(ddnswolf_version._create_static_version_module())
 
 
 setuptools.setup(
     name="ddnswolf",
     fullname="DDNSWolf",
-    version=ddnswolf.version.calculate_full_version(),
+    version=ddnswolf_version.calculate_full_version(),
     description="Dynamic DNS updater",
     author="Wolfizen",
     author_email="wolfizen@wolfizen.net",
