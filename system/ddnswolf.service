@@ -1,0 +1,12 @@
+[Unit]
+Description=Dynamic DNS updater
+After=network.target
+
+[Service]
+DynamicUser=true
+Type=simple
+ExecStart=/usr/bin/ddnswolf
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target

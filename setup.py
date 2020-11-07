@@ -51,6 +51,7 @@ setuptools.setup(
     entry_points={"console_scripts": ["ddnswolf = ddnswolf.main:main"]},
     data_files=[
         ("/etc", ["ddnswolf.conf"]),
+        ("lib/systemd/system", ["system/ddnswolf.service"]),
     ],
     cmdclass={
         "build_py": CustomBuildCommand,
