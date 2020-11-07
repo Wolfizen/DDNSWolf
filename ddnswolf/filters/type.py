@@ -1,22 +1,34 @@
 from typing import Iterable
 
 from ddnswolf.filters.base import AddressFilter
-from ddnswolf.models.address_update import AddressUpdate, IPv4AddressUpdate, IPv6AddressUpdate
+from ddnswolf.models.address_update import (
+    AddressUpdate,
+    IPv4AddressUpdate,
+    IPv6AddressUpdate,
+)
 
 
 class PrivateAddressFilter(AddressFilter):
-    """Selects addresses within the reserved private address range for its family. Supports only IPv4 and IPv6."""
+    """
+    Selects addresses within the reserved private address range for its family. Supports
+    only IPv4 and IPv6.
+
+    The accuracy of this class depends on the implementation and recent updates of the
+    official ipaddress module.
+    """
 
     config_type_name = "private"
 
     def filter(self, addresses: Iterable[AddressUpdate]) -> Iterable[AddressUpdate]:
         """
-        Selects private IPv4 or IPv6 addresses. Only addresses that are within the specifically designated multiple-use
-        non-Internet routable blocks are considered private. The relative ordering of addresses is preserved.
+        Selects private IPv4 or IPv6 addresses. Only addresses that are within the
+        specifically designated multiple-use non-Internet routable blocks are considered
+        private. The relative ordering of addresses is preserved.
 
         Addresses that are not IPv4 or IPv6 are not included in the result.
 
-        The accuracy of this function depends on the implementation and recent updates of the official ipaddress module.
+        The accuracy of this function depends on the implementation and recent updates
+        of the official ipaddress module.
         """
 
         def is_private(a):
@@ -31,18 +43,26 @@ class PrivateAddressFilter(AddressFilter):
 
 
 class PublicAddressFilter(AddressFilter):
-    """Selects addresses within the public address range for its family. Supports only IPv4 and IPv6."""
+    """
+    Selects addresses within the public address range for its family. Supports only IPv4
+    and IPv6.
+
+    The accuracy of this class depends on the implementation and recent updates of the
+    official ipaddress module.
+    """
 
     config_type_name = "public"
 
     def filter(self, addresses: Iterable[AddressUpdate]) -> Iterable[AddressUpdate]:
         """
-        Selects public IPv4 or IPv6 addresses. Only addresses that are within the specifically designated global
-        Internet routable blocks are considered private. The relative ordering of addresses is preserved.
+        Selects public IPv4 or IPv6 addresses. Only addresses that are within the
+        specifically designated global Internet routable blocks are considered private.
+        The relative ordering of addresses is preserved.
 
         Addresses that are not IPv4 or IPv6 are not included in the result.
 
-        The accuracy of this function depends on the implementation and recent updates of the official ipaddress module.
+        The accuracy of this function depends on the implementation and recent updates
+        of the official ipaddress module.
         """
 
         def is_public(a):
@@ -54,4 +74,3 @@ class PublicAddressFilter(AddressFilter):
                 return False
 
         return filter(is_public, addresses)
-

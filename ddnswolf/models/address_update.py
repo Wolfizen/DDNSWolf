@@ -6,11 +6,13 @@ from dns.rdatatype import RdataType
 
 class AddressUpdate:
     """
-    An update of one of the address sources that DDNSWolf is monitoring. Most often this update will represent an address
-    on a network interface. The address identified by this update may not be an "updated" address, i.e. this object will
-    be created regardless of if the address actually changed or not.
+    An update of one of the address sources that DDNSWolf is monitoring. Most often this
+    update will represent an address on a network interface. The address identified by
+    this update may not be an "updated" address, i.e. this object will be created
+    regardless of if the address actually changed or not.
 
-    For address types other than IPv4 and IPv6, subclass this and add it to your protocol file.
+    For address types other than IPv4 and IPv6, subclass this and add it to your
+    protocol file.
     """
 
     def __init__(self):

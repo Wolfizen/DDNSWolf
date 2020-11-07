@@ -48,15 +48,11 @@ setuptools.setup(
         "requests~=2.24",
     ],
     packages=setuptools.find_namespace_packages(include=["ddnswolf*"]),
-    entry_points={
-        "console_scripts": [
-            "ddnswolf = ddnswolf.main:main"
-        ]
-    },
+    entry_points={"console_scripts": ["ddnswolf = ddnswolf.main:main"]},
     data_files=[
         ("/etc", ["ddnswolf.conf"]),
     ],
     cmdclass={
         "build_py": CustomBuildCommand,
-    }
+    },
 )

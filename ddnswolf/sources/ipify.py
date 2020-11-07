@@ -3,7 +3,11 @@ from typing import Iterable
 
 import requests
 
-from ddnswolf.models.address_update import AddressUpdate, IPv4AddressUpdate, IPv6AddressUpdate
+from ddnswolf.models.address_update import (
+    AddressUpdate,
+    IPv4AddressUpdate,
+    IPv6AddressUpdate,
+)
 from ddnswolf.sources.base import AddressSource
 
 

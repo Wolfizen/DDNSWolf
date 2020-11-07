@@ -11,7 +11,8 @@ class NthAddressFilter(AddressFilter):
 
     def __init__(self, index: Union[str, int]):
         """
-        :param index: The index in the input list to select. Indices starting from the end can be specified with
+        :param index: The index in the input list to select. Indices starting from the
+        end can be specified with
         negative numbers.
         """
         super(NthAddressFilter, self).__init__()
@@ -19,7 +20,8 @@ class NthAddressFilter(AddressFilter):
 
     def filter(self, addresses: Iterable[AddressUpdate]) -> Iterable[AddressUpdate]:
         """
-        Selects the address located at index. If there is no address at that index, an empty list is returned.
+        Selects the address located at index. If there is no address at that index, an
+        empty list is returned.
         """
         try:
             # Negative indices are handled nicely by the Python standard library.
@@ -35,7 +37,8 @@ class FirstAddressFilter(AddressFilter):
 
     def filter(self, addresses: Iterable[AddressUpdate]) -> Iterable[AddressUpdate]:
         """
-        Selects the first address in the list. If there are no addresses in the list, an empty list is returned.
+        Selects the first address in the list. If there are no addresses in the list, an
+        empty list is returned.
         """
         return addresses[0:1]
 
@@ -47,8 +50,7 @@ class LastAddressFilter(AddressFilter):
 
     def filter(self, addresses: Iterable[AddressUpdate]) -> Iterable[AddressUpdate]:
         """
-        Selects the last address in the list. If there are no addresses in the list, an empty list is returned.
+        Selects the last address in the list. If there are no addresses in the list, an
+        empty list is returned.
         """
         return addresses[-1:]
-
-
