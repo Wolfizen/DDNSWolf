@@ -40,7 +40,7 @@ class IPIfyAddressSource(AddressSource):
             print("No IPv4 address received from ipify.")
         # IPv6
         try:
-            response_v6 = requests.get("https://api4.ipify.org")
+            response_v6 = requests.get("https://api6.ipify.org")
             if response_v6.status_code == 200:
                 address_v6 = IPv6AddressUpdate(IPv6Address(response_v6.text))
                 addresses.append(address_v6)
