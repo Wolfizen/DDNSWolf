@@ -3,7 +3,7 @@ import time
 from datetime import timedelta, datetime
 from typing import List
 
-from pyhocon import ConfigFactory, ConfigTree
+from pyhocon import ConfigFactory, ConfigTree, ConfigException
 
 from ddnswolf import util
 from ddnswolf.filters.base import AddressFilter
@@ -151,18 +151,20 @@ class DDNSWolfApplication:
                 os.path.abspath(os.path.join(os.path.sep, "etc", "ddnswolf.conf")),
             ]
 
-        config = None
-        for path in try_paths:
-            try:
-                config = ConfigFactory.parse_file(path)
-            except FileNotFoundError:
-                # Try the next path
-                pass
-        if not config:
+        first_valid_path = next(filter(os.path.exists, try_paths), None)
+        if first_valid_path is None:
             raise Exception(
-                f"Unable to load a configuration. Attempted paths: "
+                f"Unable to find a configuration. Attempted paths: "
                 f"{', '.join(try_paths)}"
             )
+
+        try:
+            config = ConfigFactory.parse_file(first_valid_path)
+        except ConfigException:
+            raise Exception(f"Unable to load configuration at {first_valid_path}")
+        if len(config) == 0:
+            raise Exception(f"Empty configuration at {first_valid_path}")
+
         return config
 
 
