@@ -1,3 +1,4 @@
+import logging
 from ipaddress import IPv4Address, IPv6Address
 from typing import Iterable
 
@@ -9,6 +10,9 @@ from ddnswolf.models.address_update import (
     IPv6AddressUpdate,
 )
 from ddnswolf.sources.base import AddressSource
+
+
+logger = logging.getLogger(__name__)
 
 
 class IPIfyAddressSource(AddressSource):
@@ -33,21 +37,21 @@ class IPIfyAddressSource(AddressSource):
             if response_v4.status_code == 200:
                 address_v4 = IPv4AddressUpdate(IPv4Address(response_v4.text))
                 addresses.append(address_v4)
-                print(f"IPv4 address received from ipify: {address_v4}.")
+                logger.info(f"IPv4 address received from ipify: {address_v4}.")
             else:
-                print(f"Unexpected response from ipify IPv4: {response_v4}.")
+                logger.warning(f"Unexpected response from ipify IPv4: {response_v4}.")
         except requests.exceptions.ConnectionError:
-            print("No IPv4 address received from ipify.")
+            logger.warning("No IPv4 address received from ipify.")
         # IPv6
         try:
             response_v6 = requests.get("https://api6.ipify.org")
             if response_v6.status_code == 200:
                 address_v6 = IPv6AddressUpdate(IPv6Address(response_v6.text))
                 addresses.append(address_v6)
-                print(f"IPv6 address received from ipify: {address_v6}.")
+                logger.info(f"IPv6 address received from ipify: {address_v6}.")
             else:
-                print(f"Unexpected response from ipify IPv6: {response_v6}.")
+                logger.warning(f"Unexpected response from ipify IPv6: {response_v6}.")
         except requests.exceptions.ConnectionError:
-            print("No IPv6 address received from ipify.")
+            logger.warning("No IPv6 address received from ipify.")
 
         return addresses

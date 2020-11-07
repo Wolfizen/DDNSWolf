@@ -1,5 +1,6 @@
 import ipaddress
 import itertools
+import logging
 from abc import ABC
 from typing import Union, List
 
@@ -12,6 +13,8 @@ from ddnswolf.models.address_update import (
     IPv4AddressUpdate,
     IPv6AddressUpdate,
 )
+
+logger = logging.getLogger(__name__)
 
 
 class DynamicDNSUpdater(ABC):
@@ -125,12 +128,12 @@ class DynamicDNSUpdater(ABC):
         process picks the first global address for each subclass of AddressUpdate. If
         there are no public addresses, then the first address of any kind is picked.
         """
-        print(f"Starting update for {self.name}...")
+        logger.info(f"Starting update for {self.name}...")
 
         all_addresses = list(
             itertools.chain(*map(lambda p: p.provide_addresses(), self.subscriptions))
         )
-        print(
+        logger.info(
             f"Addresses received from subscriptions: "
             f"{', '.join(map(str, all_addresses))}."
         )
@@ -151,7 +154,7 @@ class DynamicDNSUpdater(ABC):
             ):
                 cleaned_addresses[type(address)] = address
         if sorted(all_addresses) != sorted(cleaned_addresses.values()):
-            print(
+            logger.info(
                 "!! Some addresses were removed, subscriptions provided multiple "
                 "within the same family."
             )
@@ -160,11 +163,13 @@ class DynamicDNSUpdater(ABC):
             # noinspection PyBroadException
             try:
                 if self.needs_update(address):
-                    print(f"Sending update for address {address}.")
+                    logger.info(f"Sending update for address {address}.")
                     self.update(address)
                 else:
-                    print(f"Update not needed for address {address}.")
+                    logger.info(f"Update not needed for address {address}.")
             except Exception as ex:
-                print(f"An error occurred while updating address {address}: {ex}.")
+                logger.warning(
+                    f"An error occurred while updating address {address}: {ex}."
+                )
 
-        print(f"Update finished for {self.name}.")
+        logger.info(f"Update finished for {self.name}.")
