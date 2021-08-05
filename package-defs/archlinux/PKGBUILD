@@ -1,4 +1,4 @@
-# Maintainer/Developer: Winona Schroeer-Smith (Wolfizen) <wolfizen@wolfizen.net>
+# Maintainer and Developer: Winona Schroeer-Smith (Wolfizen) <wolfizen@wolfizen.net>
 
 pkgname='ddnswolf-git'
 pkgver=1
@@ -14,8 +14,7 @@ depends=(
 makedepends=('python-gitpython')
 source=(
     # When building from a local source this does not need to be downloaded
-    # and can be commented out. However doing that dynamically would be bad
-    # practice, stopping any program trying to programatically understand PKGBUILDs.
+    # and can be commented out.
     'git://github.com/Wolfizen/DDNSWolf.git'
 )
 sha256sums=(
