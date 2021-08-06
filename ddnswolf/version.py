@@ -4,10 +4,13 @@ Tools to calculate the current version identifier of the project. To use this fi
 either import it in another python module and call calculate_full_version() or run this
 file as a script.
 """
+import logging
 from abc import ABC
 from importlib.util import spec_from_loader, module_from_spec
 
 from pkg_resources import parse_version
+
+logger = logging.getLogger(__name__)
 
 
 release_version = "1"
@@ -19,7 +22,7 @@ commits with the same identifier are development builds, coming later in the ord
 
 DDNSWolf uses a modification of standard semantic versioning. Releases primarily
 increment the major version number, using the minor version for hotfixes immediately
-following release. "Bugfix" versions should almost never be used, preferring to
+following release. "Bugfix" versions should never be used, preferring to
 increment the minor version instead. Major releases with no lesser version numbers are
 a single number with no ".0.0". Minor versions follow with no ".0" at the end.
 
@@ -123,10 +126,13 @@ class DynamicVersionInfo(VersionInfo):
 
     def get_build_number(self) -> int:
         return (
+            # Bump for snapshot
             (1 if self.is_snapshot_build() else 0)
-            + 1  # Bump for snapshot
-            + len(list(self.project_repo.head.commit.iter_parents()))  # Current commit
-        )  # All ancestors
+            # Current commit
+            + 1
+            # All ancestors
+            + len(list(self.project_repo.head.commit.iter_parents()))
+        )
 
     def is_primary_release(self) -> bool:
         if self.is_snapshot_build():
@@ -186,6 +192,24 @@ class StaticVersionInfo(VersionInfo):
         )
 
 
+class SimpleVersionInfo(VersionInfo):
+    """
+    If the git module fails to import, this class is the fallback.
+    """
+
+    def __init__(self):
+        pass
+
+    def is_snapshot_build(self) -> bool:
+        return False
+
+    def get_build_number(self) -> int:
+        return 0
+
+    def is_primary_release(self) -> bool:
+        return True
+
+
 def _create_static_version_module() -> str:
     """
     Generates a python module that contains a StaticVersionInfo copy of the current
@@ -208,18 +232,29 @@ embedded_version_info = {repr(static)}
 """
 
 
-def calculate_full_version() -> str:
+def get_full_version() -> str:
     """
     CALL THIS TO GET THE PROJECT VERSION. If a StaticVersionInfo object is present
-    in ddnswolf.version_static, it will be used. Otherwise use DynamicVersionInfo.
+    in ddnswolf.version_static, it will be used. Otherwise use DynamicVersionInfo. If
+    the git module is not available, a SimpleVersionInfo object will be used.
     """
+    # Static version
     try:
         from . import version_static
 
         return version_static.embedded_version_info.get_full_version()
     except ImportError:
-        return DynamicVersionInfo().get_full_version()
+        # Dynamic version
+        try:
+            return DynamicVersionInfo().get_full_version()
+        except ImportError:
+            # Empty version
+            logger.warning(
+                "`git` module is missing. DDNSWolf cannot calculate an accurate"
+                + " version number."
+            )
+            return SimpleVersionInfo().get_full_version()
 
 
 if __name__ == "__main__":
-    print(calculate_full_version(), end="")
+    print(get_full_version(), end="")

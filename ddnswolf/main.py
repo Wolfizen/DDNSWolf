@@ -12,7 +12,7 @@ from ddnswolf.protocols.base import DynamicDNSUpdater
 from ddnswolf.sources.base import AddressSource
 
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger(None)
 
 
 class DDNSWolfApplication:
@@ -174,7 +174,7 @@ class DDNSWolfApplication:
 
 def main():
     logging.basicConfig(level=logging.INFO, format="%(levelname)s/%(name)s %(message)s")
-    logger.info(f"~~ DDNSWolf version {version.calculate_full_version()} ~~")
+    logger.info(f"~~ DDNSWolf version {version.get_full_version()} ~~")
     app = DDNSWolfApplication.from_config()
     app.run()
     pass

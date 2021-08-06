@@ -43,7 +43,7 @@ prepare() {
 
 pkgver() {
     cd "$(_src_pyroot)"
-    python 'ddnswolf/version.py' | sed 's/-/./g'
+    python 'ddnswolf/version.py' | sed 's/-/_/g'
 }
 
 build() {
