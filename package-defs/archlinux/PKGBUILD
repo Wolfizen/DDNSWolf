@@ -8,7 +8,7 @@ arch=('any')
 url='https://github.com/Wolfizen/DDNSWolf'
 license=('GPL3')
 depends=(
-    'python>=3.6' 'python-cloudflare' 'python-dnspython' 'python-netifaces' 'python-pyhocon'
+    'python>=3.9' 'python-cloudflare' 'python-dnspython' 'python-netifaces' 'python-pyhocon'
     'python-requests'
 )
 makedepends=('python-gitpython')

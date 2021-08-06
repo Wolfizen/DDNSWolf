@@ -5,5 +5,5 @@ build-backend = "setuptools.build_meta"
 
 [tool.black]
 line-length = 88
-target-version = ['py36']
+target-version = ['py39']
 exclude = '(/venv/|/build/|/dist/|/ddnswolf.egg-info/)'
