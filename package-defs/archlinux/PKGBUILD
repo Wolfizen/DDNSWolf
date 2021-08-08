@@ -8,12 +8,19 @@ arch=('any')
 url='https://github.com/Wolfizen/DDNSWolf'
 license=('GPL3')
 depends=(
-    'python>=3.9' 'python-cloudflare' 'python-dnspython' 'python-netifaces' 'python-pyhocon'
+    'python>=3.9'
+    'python-cloudflare'
+    # community/python-dnspython is locked to 1.16. ddnswolf needs 2.0
+    'python-dnspython-git>=v2.0'
+    'python-netifaces'
+    'python-pyhocon'
     'python-requests'
 )
-makedepends=('git' 'python-gitpython')
-provides=('ddnswolf')
-conflicts=('ddnswolf')
+makedepends=(
+    'git'
+    'python-gitpython'
+    'python-setuptools'
+)
 source=(
     # Use local source if present. LOCAL_SOURCE is a directory path to
     # a (potentially modified) checkout of the DDNSWolf repo.
