@@ -1,4 +1,5 @@
 import logging
+import importlib.resources
 import os.path
 import time
 from datetime import timedelta, datetime
@@ -6,7 +7,8 @@ from typing import List
 
 from pyhocon import ConfigFactory, ConfigTree, ConfigException
 
-from ddnswolf import util, version
+import ddnswolf.version
+from ddnswolf import util
 from ddnswolf.filters.base import AddressFilter
 from ddnswolf.protocols.base import DynamicDNSUpdater
 from ddnswolf.sources.base import AddressSource
@@ -174,7 +176,8 @@ class DDNSWolfApplication:
 
 def main():
     logging.basicConfig(level=logging.INFO, format="%(levelname)s/%(name)s %(message)s")
-    logger.info(f"~~ DDNSWolf version {version.get_full_version()} ~~")
+    logger.info("\n" + importlib.resources.read_text("ddnswolf", "logo.txt", "utf-8"))
+    logger.info(f"== DDNSWolf version {ddnswolf.version.get_full_version()} ==")
     app = DDNSWolfApplication.from_config()
     app.run()
     pass
