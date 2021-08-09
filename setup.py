@@ -24,12 +24,6 @@ class DDNSWolfBuildCommand(setuptools_build_py):
 
 
 setuptools.setup(
-    # Non-python files that will be included in the build output.
-    # setup.cfg does not support this method of declaring data files.
-    data_files=[
-        ("/etc", ["ddnswolf.conf"]),
-        ("lib/systemd/system", ["system/ddnswolf.service"]),
-    ],
     # setup.cfg does not support defining custom build steps.
     cmdclass={
         "build_py": DDNSWolfBuildCommand,
