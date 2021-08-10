@@ -8,6 +8,7 @@ from dns import resolver
 from dns.rdataclass import RdataClass
 from pyhocon import ConfigTree
 
+from ddnswolf.exceptions import DDNSWolfProgramException, log_exception
 from ddnswolf.models.address_provider import AddressProvider
 from ddnswolf.models.address_update import (
     IPv4AddressUpdate,
@@ -91,7 +92,7 @@ class DynamicDNSUpdater(ABC):
         if not isinstance(address_update, IPv4AddressUpdate) or isinstance(
             address_update, IPv6AddressUpdate
         ):
-            raise Exception(
+            raise DDNSWolfProgramException(
                 f"Unsupported address update for {type(self).__name__}: "
                 f"{address_update}"
             )
@@ -154,8 +155,8 @@ class DynamicDNSUpdater(ABC):
             ):
                 cleaned_addresses[type(address)] = address
         if sorted(all_addresses) != sorted(cleaned_addresses.values()):
-            logger.info(
-                "!! Some addresses were removed, subscriptions provided multiple "
+            logger.warning(
+                "Some addresses were removed, subscriptions provided multiple "
                 "within the same family."
             )
 
@@ -168,8 +169,7 @@ class DynamicDNSUpdater(ABC):
                 else:
                     logger.info(f"Update not needed for address {address}.")
             except Exception as ex:
-                logger.warning(
-                    f"An error occurred while updating address {address}: {ex}."
-                )
+                logger.warning(f"An error occurred while updating address {address}:")
+                log_exception(logger, ex)
 
         logger.info(f"Update finished for {self.name}.")

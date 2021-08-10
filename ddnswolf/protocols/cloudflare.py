@@ -9,6 +9,7 @@ from CloudFlare.exceptions import CloudFlareAPIError
 from dns.rdatatype import RdataType, UnknownRdatatype
 
 from ddnswolf import util
+from ddnswolf.exceptions import DDNSWolfUserException
 from ddnswolf.models.address_update import IPv4AddressUpdate, IPv6AddressUpdate
 from ddnswolf.protocols.base import DynamicDNSUpdater
 
@@ -61,7 +62,7 @@ class CloudflareDNSUpdater(DynamicDNSUpdater):
             )
             # Update success! (API throws on error)
         else:
-            raise Exception(
+            raise DDNSWolfUserException(
                 f"DNS record missing for {address_update.address}, and configuration "
                 f"does not allow creating the record."
             )
@@ -123,13 +124,13 @@ class CloudflareDNSUpdater(DynamicDNSUpdater):
                 pass
             try:
                 zone_name = zone_name.parent()
-            except dns.name.NoParent:
+            except dns.name.NoParent as ex:
                 # No more names to check. Probably invalid configuration.
-                raise Exception(
+                raise DDNSWolfUserException(
                     f"Could not find the zone for {self.config['hostname']}. Either it "
                     f"is the wrong name or the access token does not have sufficient "
                     f"permissions to read the zone."
-                )
+                ) from ex
 
     def _set_zone(self, zone):
         """Update the cache of the Cloudflare zone."""

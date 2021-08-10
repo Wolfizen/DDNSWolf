@@ -3,6 +3,7 @@ from typing import Iterable
 
 import netifaces
 
+from ddnswolf.exceptions import DDNSWolfUserException
 from ddnswolf.models.address_update import (
     AddressUpdate,
     IPv4AddressUpdate,
@@ -28,7 +29,9 @@ class InterfaceAddressSource(AddressSource):
 
     def provide_addresses(self) -> Iterable[AddressUpdate]:
         if self.config["iface"] not in netifaces.interfaces():
-            raise Exception(f"Interface {self.config['iface']} does not exist!")
+            raise DDNSWolfUserException(
+                f"Interface {self.config['iface']} does not exist!"
+            )
 
         # Interfaces can have any number of addresses, from any address family. This
         # logic selects address families that we can support and constructs an

@@ -9,6 +9,11 @@ from pyhocon import ConfigFactory, ConfigTree, ConfigException
 
 import ddnswolf.version
 from ddnswolf import util
+from ddnswolf.exceptions import (
+    DDNSWolfUserException,
+    DDNSWolfProgramException,
+    log_exception,
+)
 from ddnswolf.filters.base import AddressFilter
 from ddnswolf.protocols.base import DynamicDNSUpdater
 from ddnswolf.sources.base import AddressSource
@@ -78,11 +83,11 @@ class DDNSWolfApplication:
                 source_type_name = source_config.get_string("type")
                 source_cls = source_classes[source_type_name]
                 sources[source_name] = source_cls(source_name, source_config)
-            except KeyError:
+            except KeyError as ex:
                 # noinspection PyUnboundLocalVariable
-                raise KeyError(
+                raise DDNSWolfUserException(
                     f"Could not find a source with the type {source_type_name}."
-                )
+                ) from ex
 
         # Load updater objects.
         util.import_all_submodules("ddnswolf.protocols")
@@ -96,11 +101,11 @@ class DDNSWolfApplication:
                 updater_type_name = updater_config.get_string("type")
                 updater_cls = updater_classes[updater_type_name]
                 updaters.append(updater_cls(updater_name, updater_config))
-            except KeyError:
+            except KeyError as ex:
                 # noinspection PyUnboundLocalVariable
-                raise KeyError(
+                raise DDNSWolfUserException(
                     f"Could not find an updater with the name {updater_type_name}."
-                )
+                ) from ex
 
         # Parse and connect updater subscriptions.
         #   "What the hell is this?" you may ask. This is an evil and amazing solution
@@ -143,7 +148,9 @@ class DDNSWolfApplication:
                     )
                     updater.subscribe(computed_provider)
                 except NameError as ex:
-                    raise NameError(f"Unknown filter or source: {ex}")
+                    raise DDNSWolfUserException(
+                        f"Unknown filter or source: {ex}"
+                    ) from ex
 
         return DDNSWolfApplication(list(sources.values()), updaters, check_interval)
 
@@ -159,28 +166,37 @@ class DDNSWolfApplication:
 
         first_valid_path = next(filter(os.path.exists, try_paths), None)
         if first_valid_path is None:
-            raise Exception(
+            raise DDNSWolfUserException(
                 f"Unable to find a configuration. Attempted paths: "
                 f"{', '.join(try_paths)}"
             )
 
         try:
             config = ConfigFactory.parse_file(first_valid_path)
-        except ConfigException:
-            raise Exception(f"Unable to load configuration at {first_valid_path}")
+        except ConfigException as ex:
+            raise DDNSWolfProgramException(
+                f"Unable to load configuration at {first_valid_path}"
+            ) from ex
         if len(config) == 0:
-            raise Exception(f"Empty configuration at {first_valid_path}")
+            raise DDNSWolfUserException(f"Empty configuration at {first_valid_path}")
 
         return config
 
 
 def main():
-    logging.basicConfig(level=logging.INFO, format="%(levelname)s/%(name)s %(message)s")
-    logger.info("\n" + importlib.resources.read_text("ddnswolf", "logo.txt", "utf-8"))
-    logger.info(f"== DDNSWolf version {ddnswolf.version.get_full_version()} ==")
-    app = DDNSWolfApplication.from_config()
-    app.run()
-    pass
+    # noinspection PyBroadException
+    try:
+        logging.basicConfig(
+            level=logging.INFO, format="%(levelname)s/%(name)s %(message)s"
+        )
+        logger.info(
+            "\n" + importlib.resources.read_text("ddnswolf", "logo.txt", "utf-8")
+        )
+        logger.info(f"== DDNSWolf version {ddnswolf.version.get_full_version()} ==")
+        app = DDNSWolfApplication.from_config()
+        app.run()
+    except Exception as ex:
+        log_exception(logger, ex)
 
 
 if __name__ == "__main__":
