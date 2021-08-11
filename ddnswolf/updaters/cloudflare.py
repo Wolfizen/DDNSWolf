@@ -11,10 +11,10 @@ from dns.rdatatype import RdataType, UnknownRdatatype
 from ddnswolf import util
 from ddnswolf.exceptions import DDNSWolfUserException
 from ddnswolf.models.address_update import IPv4AddressUpdate, IPv6AddressUpdate
-from ddnswolf.protocols.base import DynamicDNSUpdater
+from ddnswolf.updaters.base import DNSUpdater
 
 
-class CloudflareDNSUpdater(DynamicDNSUpdater):
+class CloudflareDNSUpdater(DNSUpdater):
     """
     Updater for domains managed by Cloudflare. This updater uses the python Cloudflare
     library to perform the API calls.

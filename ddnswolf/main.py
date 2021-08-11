@@ -15,7 +15,7 @@ from ddnswolf.exceptions import (
     log_exception,
 )
 from ddnswolf.filters.base import AddressFilter
-from ddnswolf.protocols.base import DynamicDNSUpdater
+from ddnswolf.updaters.base import DNSUpdater
 from ddnswolf.sources.base import AddressSource
 
 
@@ -26,7 +26,7 @@ class DDNSWolfApplication:
     def __init__(
         self,
         sources: List[AddressSource],
-        updaters: List[DynamicDNSUpdater],
+        updaters: List[DNSUpdater],
         check_interval: timedelta,
     ):
         self.sources = sources
@@ -90,12 +90,12 @@ class DDNSWolfApplication:
                 ) from ex
 
         # Load updater objects.
-        util.import_all_submodules("ddnswolf.protocols")
+        util.import_all_submodules("ddnswolf.updaters")
         updater_classes = {
             updater_cls.config_type_name: updater_cls
-            for updater_cls in util.find_all_subclasses(DynamicDNSUpdater)
+            for updater_cls in util.find_all_subclasses(DNSUpdater)
         }
-        updaters: List[DynamicDNSUpdater] = []
+        updaters: List[DNSUpdater] = []
         for updater_name, updater_config in config.get_config("updaters").items():
             try:
                 updater_type_name = updater_config.get_string("type")

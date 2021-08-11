@@ -18,7 +18,7 @@ from ddnswolf.models.address_update import (
 logger = logging.getLogger(__name__)
 
 
-class DynamicDNSUpdater(ABC):
+class DNSUpdater(ABC):
     """
     The base class for all updaters provided by DDNSWolf. An updater represents a
     specific configuration of a dynamic DNS service, with its own authentication token
@@ -46,7 +46,7 @@ class DynamicDNSUpdater(ABC):
         """
         The config for this updater. This config is a local view of only the options for
         this instance. Use it however you want, but consider using the standard names of
-        common fields. Check other protocols for reference.
+        common fields. Check other updaters for reference.
         """
         self.subscriptions = subscriptions if subscriptions is not None else []
         """
