@@ -8,6 +8,7 @@ import logging
 from abc import ABC
 from importlib.util import spec_from_loader, module_from_spec
 
+from git import InvalidGitRepositoryError
 from pkg_resources import parse_version
 
 logger = logging.getLogger(__name__)
@@ -247,12 +248,9 @@ def get_full_version() -> str:
         # Dynamic version
         try:
             return DynamicVersionInfo().get_full_version()
-        except ImportError:
+        except (ImportError, InvalidGitRepositoryError):
             # Empty version
-            logger.warning(
-                "`git` module is missing. DDNSWolf cannot calculate an accurate"
-                + " version number."
-            )
+            logger.warning("DDNSWolf cannot calculate an accurate version number.")
             return SimpleVersionInfo().get_full_version()
 
 
