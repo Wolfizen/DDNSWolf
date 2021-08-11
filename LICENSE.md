@@ -1,5 +1,5 @@
 ## DDNSWolf License
-*Copyright (c) 2020 Winona Schroeer-Smith (Wolfizen)*
+*Copyright (c) 2020-2021 Winona Schroeer-Smith (Wolfizen)*
 
 DDNSWolf is provided under the GNU General Public License version 3,
 or later, according with:
