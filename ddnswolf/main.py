@@ -195,6 +195,11 @@ def main():
         logger.info(f"== DDNSWolf version {ddnswolf.version.get_full_version()} ==")
         app = DDNSWolfApplication.from_config()
         app.run()
+    except KeyboardInterrupt:
+        logger.info(
+            "Interrupt received, exiting now. "
+            "May your caches be full and your TTLs low."
+        )
     except Exception as ex:
         log_exception(logger, ex)
 
