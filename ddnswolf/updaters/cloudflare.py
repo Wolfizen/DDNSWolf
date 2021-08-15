@@ -1,5 +1,6 @@
 import ipaddress
 import json
+import logging
 from datetime import datetime, timedelta
 from typing import Union, Optional
 
@@ -12,6 +13,9 @@ from ddnswolf import util
 from ddnswolf.exceptions import DDNSWolfUserException
 from ddnswolf.models.address_update import IPv4AddressUpdate, IPv6AddressUpdate
 from ddnswolf.updaters.base import DNSUpdater
+
+
+logger = logging.getLogger(__name__)
 
 
 class CloudflareDNSUpdater(DNSUpdater):
@@ -46,7 +50,7 @@ class CloudflareDNSUpdater(DNSUpdater):
                 data=json.dumps({"content": str(address_update.address)}),
             )
             # Update success! (API throws on error)
-        elif self.config["create_records"]:
+        elif self.config.get("create_records", False):
             # Record does not exist. Create it with sensible defaults. TTL of 1
             # indicates automatic choice by CF.
             self.cf.zones.dns_records.post(
@@ -61,9 +65,13 @@ class CloudflareDNSUpdater(DNSUpdater):
                 ),
             )
             # Update success! (API throws on error)
+            logger.info(
+                f"Created record "
+                f"{RdataType.to_text(address_update.rdtype)} {self.config['hostname']}"
+            )
         else:
             raise DDNSWolfUserException(
-                f"DNS record missing for {address_update.address}, and configuration "
+                f"DNS record missing for {self.config['hostname']}, and configuration "
                 f"does not allow creating the record."
             )
 
