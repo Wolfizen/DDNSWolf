@@ -14,7 +14,7 @@ from pkg_resources import parse_version
 logger = logging.getLogger(__name__)
 
 
-release_version = "2"
+release_version = "3"
 """
 Public release number. This is used to identify releases, package versions, etc. This
 is incremented every time the project is ready for a public release. The first commit
