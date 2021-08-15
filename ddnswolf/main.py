@@ -3,7 +3,7 @@ import importlib.resources
 import os.path
 import time
 from datetime import timedelta, datetime
-from typing import List
+from typing import List, Callable
 
 from pyhocon import ConfigFactory, ConfigTree, ConfigException
 
@@ -15,6 +15,7 @@ from ddnswolf.exceptions import (
     log_exception,
 )
 from ddnswolf.filters.base import AddressFilter
+from ddnswolf.models.address_provider import AddressProvider
 from ddnswolf.updaters.base import DNSUpdater
 from ddnswolf.sources.base import AddressSource
 
@@ -129,16 +130,31 @@ class DDNSWolfApplication:
         util.import_all_submodules("ddnswolf.filters")
         for filter_cls in util.find_all_subclasses(AddressFilter):
 
-            def create_this_filter(*args):
-                parent_source = args[-1]
-                filter_args = args[0:-1]
-                # We are performing an unsafe operation on purpose. Any mismatched
-                # arguments will be caught by the filter constructor or during the
-                # filter() call. The fault is on the configuring user, not us.
-                # noinspection PyArgumentList
-                return filter_cls(*filter_args).as_provider(parent_source)
+            def create_filter_local(
+                _filter_cls,
+            ) -> Callable[..., AddressProvider]:
+                def filter_local(*args):
+                    # In the config, both the filter arguments and the parent source
+                    # are all given together in one function call. But in our
+                    # implementation we need to separate the filter args from the
+                    # parent source.
+                    parent_source = args[-1]
+                    filter_args = args[0:-1]
+                    # The filter args are given to the filter class as-is. It is not
+                    # our job to validate the argument types. Essentially we provide
+                    # a direct __init__ call from the config to the filter class.
+                    # noinspection PyArgumentList
+                    return _filter_cls(*filter_args).as_provider(parent_source)
 
-            subscription_eval_locals[filter_cls.config_type_name] = create_this_filter
+                # This return is very important. A return statement is required to
+                # create a closure. Without this return and the surrounding
+                # create_filter_local() function, the surrounding local variables
+                # would not be cloned for each instance of the filter function.
+                return filter_local
+
+            subscription_eval_locals[filter_cls.config_type_name] = create_filter_local(
+                filter_cls
+            )
 
         for updater in updaters:
             for subscription_str in updater.config.get_list("subscriptions"):
