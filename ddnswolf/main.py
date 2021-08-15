@@ -55,7 +55,7 @@ class DDNSWolfApplication:
             updater.update_from_subscriptions()
 
     @classmethod
-    def from_config(
+    def create_from_config(
         cls, config: ConfigTree = None, config_path: str = None
     ) -> "DDNSWolfApplication":
         """
@@ -67,7 +67,7 @@ class DDNSWolfApplication:
         """
         # Read config from file if needed.
         if config is None:
-            config = cls.read_config(config_path)
+            config = cls.read_config_file(config_path)
 
         # Global options.
         check_interval = timedelta(seconds=config.get_int("check_interval_seconds"))
@@ -171,7 +171,7 @@ class DDNSWolfApplication:
         return DDNSWolfApplication(list(sources.values()), updaters, check_interval)
 
     @staticmethod
-    def read_config(config_path: str = None) -> ConfigTree:
+    def read_config_file(config_path: str = None) -> ConfigTree:
         if config_path is not None:
             try_paths = [config_path]
         else:
@@ -196,6 +196,7 @@ class DDNSWolfApplication:
         if len(config) == 0:
             raise DDNSWolfUserException(f"Empty configuration at {first_valid_path}")
 
+        logger.info(f"Using configuration file at {first_valid_path}")
         return config
 
 
@@ -209,7 +210,7 @@ def main():
             "\n" + importlib.resources.read_text("ddnswolf", "logo.txt", "utf-8")
         )
         logger.info(f"== DDNSWolf version {ddnswolf.version.get_full_version()} ==")
-        app = DDNSWolfApplication.from_config()
+        app = DDNSWolfApplication.create_from_config()
         app.run()
     except KeyboardInterrupt:
         logger.info(
