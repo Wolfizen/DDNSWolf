@@ -23,4 +23,9 @@ dependencies are declared in `setup.cfg` and pip can read this file.
 
 ### Building for distribution
 
-WIP
+This project uses Python `setuptools` to build for distribution.
+The build configuration is defined in `setup.cfg` and `setup.py`.
+
+To install the package on your system:
+
+    python3 setup.py
